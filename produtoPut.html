@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Atualizar Produto</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #7E57C2;
+            margin: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        h1 {
+            color: #333;
+        }
+        form {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            width: 300px;
+        }
+        input {
+            width: 280px;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #7E57C2;
+            color: white;
+            border: none;
+            cursor: pointer;
+            width: 303px;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button:hover {
+            background-color: #673AB7;
+        }
+        .message {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 5px;
+            width: 300px;
+            text-align: center;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .product-details {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 5px;
+            background-color: #ffffff;
+            width: 300px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        @media (max-width: 600px) {
+            .form-container {
+                padding: 10px;
+                max-width: 100%; /* O formulário ocupa toda a largura da tela em dispositivos pequenos */
+            }
+
+            input, button {
+                font-size: 14px;
+                padding: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <form id="updateProductForm">
+    <h1 style="text-align: center;">Atualizar Produto</h1>
+    <input type="number" id="id" placeholder="ID do Produto" required>
+    <input type="text" id="nome" placeholder="Nome do Produto" required>
+    <input type="text" id="descricao" placeholder="Descrição" required>
+    <input type="number" id="quantidade" placeholder="Quantidade" required>
+    <input type="text" id="marca" placeholder="Marca" required>
+    <input type="number" id="preco" placeholder="Preço" required>
+    <input type="date" id="validade" placeholder="Validade" required>
+    <button type="submit">Atualizar Produto</button>
+</form>
+
+<!-- Mensagem de resultado (sucesso ou erro) -->
+<div class="message" id="message" style="display: none;"></div>
+
+<!-- Detalhes do produto atualizado -->
+<div class="product-details" id="productDetails" style="display: none;"></div>
+
+<script>
+    document.getElementById('updateProductForm').addEventListener('submit', function(event) {
+        event.preventDefault(); // Evita o comportamento padrão do formulário
+
+        const id = document.getElementById('id').value; // Captura o ID
+        const nome = document.getElementById('nome').value;
+        const descricao = document.getElementById('descricao').value;
+        const marca = document.getElementById('marca').value;
+        const preco = document.getElementById('preco').value;
+        const quantidade = document.getElementById('quantidade').value;
+        const validade = document.getElementById('validade').value;
+
+        const productData = {
+            id: id, // Inclui ID nos dados
+            nome: nome,
+            descricao: descricao,
+            quantidade: quantidade,
+            marca: marca,
+            preco: preco,
+            validade: validade
+        };
+
+        // Requisição PUT para a API
+        fetch('http://localhost/Loja-produtos/controller/produto.php', {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json' // Indica que estamos enviando JSON
+            },
+            body: JSON.stringify(productData) // Converte o objeto em JSON
+        })
+        .then(response => {
+            if (response.ok) {
+                return response.json();
+            } else {
+                throw new Error('Erro na atualização do produto.');
+            }
+        })
+        .then(data => {
+            // Mostra a mensagem de sucesso
+            showMessage('Produto atualizado com sucesso!', 'success');
+            showUpdatedProduct(productData); // Mostra os detalhes do produto atualizado
+        })
+        .catch(error => {
+            // Mostra a mensagem de erro
+            showMessage('Erro ao atualizar o produto: ' + error.message, 'error');
+        });
+    });
+
+    // Função para exibir mensagem de sucesso ou erro
+    function showMessage(message, type) {
+        const messageDiv = document.getElementById('message');
+        messageDiv.innerText = message;
+        messageDiv.className = 'message ' + type;
+        messageDiv.style.display = 'block';
+
+        // Oculta a mensagem após 5 segundos
+        setTimeout(() => {
+            messageDiv.style.display = 'none';
+        }, 5000);
+    }
+
+    // Função para mostrar detalhes do produto atualizado
+    function showUpdatedProduct(product) {
+        const productDetails = document.getElementById('productDetails');
+        productDetails.innerHTML = `
+            <h3>Produto Atualizado:</h3>
+            <p><strong>ID:</strong> ${product.id}</p>
+            <p><strong>Nome:</strong> ${product.nome}</p>
+            <p><strong>Descrição:</strong> ${product.descricao}</p>
+            <p><strong>Quantidade:</strong> ${product.quantidade}</p>
+            <p><strong>Marca:</strong> ${product.marca}</p>
+            <p><strong>Preço:</strong> R$ ${parseFloat(product.preco).toFixed(2)}</p>
+            <p><strong>Validade:</strong> ${new Date(product.validade).toLocaleDateString('pt-BR')}</p>
+        `;
+        productDetails.style.display = 'block'; // Mostra os detalhes do produto
+    }
+</script>
+
+</body>
+</html>

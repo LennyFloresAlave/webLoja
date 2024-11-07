@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deletar Produto</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #7E57C2;
+            margin: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        form {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            width: 300px;
+        }
+        input{
+            width: 280px;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #7E57C2;
+            color: white;
+            border: none;
+            cursor: pointer;
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button:hover {
+            background-color: #673AB7;
+        }
+        .message {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 5px;
+            width: 300px;
+            text-align: center;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+</head>
+<body>
+
+    <form id="deleteProdutoForm" style="margin-top: 300px;">
+        <h1 style="text-align: center;">Deletar Produto</h1>
+        <input type="text" id="deleteId" placeholder="ID do Produto" required />
+        <button type="submit">Deletar Produto</button>
+    </form>
+    <div id="deleteMessage" style="display:none;"></div>
+    
+
+<script>
+ document.getElementById('deleteProdutoForm').addEventListener('submit', function(event) {
+    event.preventDefault(); // Evita o comportamento padrão do formulário
+
+    const id = document.getElementById('deleteId').value;
+
+    // Cria um objeto para enviar ao servidor
+    const deleteData = {
+        tabela: 'Produtos', // Nome da tabela
+        id
+    };
+
+    fetch('http://localhost/Loja-produtos/controller/produto.php', {
+        method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(deleteData)
+    })
+    .then(response => {
+        console.log(response); // Verificar a resposta
+        if (!response.ok) {
+            throw new Error('Erro na requisição: ' + response.statusText);
+        }
+        return response.json(); // Processa o JSON retornado
+    })
+    .then(jsonData => {
+        console.log(jsonData); // Verificar o conteúdo do JSON retornado
+        
+        // Verifica se o status é '204' e exibe mensagem de sucesso
+        if (jsonData.status === '204') {
+            showDeleteMessage(jsonData.msg, 'success');
+        } else if (jsonData.error) {
+            showDeleteMessage('Erro: ' + jsonData.error, 'error');
+        } else {
+            showDeleteMessage('Erro inesperado.', 'error');
+        }
+    })
+    .catch(error => {
+        // Exibir a mensagem de erro no console
+        console.error('Erro na requisição:', error);
+        showDeleteMessage('Erro na requisição: ' + error.message, 'error');
+    });
+});
+
+// Função para exibir mensagem de sucesso ou erro na exclusão
+function showDeleteMessage(message, type) {
+    const deleteMessageDiv = document.getElementById('deleteMessage');
+    deleteMessageDiv.innerText = message;
+    deleteMessageDiv.className = 'message ' + type;
+    deleteMessageDiv.style.display = 'block';
+
+    // Oculta a mensagem após 5 segundos
+    setTimeout(() => {
+        deleteMessageDiv.style.display = 'none';
+    }, 7000);
+}
+
+
+</script>
+
+</body>
+</html>

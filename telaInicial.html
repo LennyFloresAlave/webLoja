@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Métodos HTTP Windows</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #7E57C2;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .button-container {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;
+            max-width: 800px;
+        }
+        a {
+            text-decoration: none;
+            width: 100px;
+        }
+        button {
+            width: 100%;
+            padding: 15px;
+            font-size: 16px;
+            color: white;
+            background-color: #7E57C2;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #673AB7;
+        }
+        @media (max-width: 600px) {
+            .button-container {
+                flex-direction: column;
+                align-items: center;
+            }
+            a {
+                width: 100%;
+            }
+            button {
+                width: 100%;
+                padding: 12px;
+                font-size: 14px;
+            }
+        }
+        .fundo{
+            background-color: white;
+            padding: 25px;
+            border-radius: 7px;
+        }
+    </style>
+</head>
+<body>
+<div class="fundo">
+
+    <h1>Métodos HTTP</h1>
+    <div class="button-container">
+        <a href="produtoGet.html"><button class="get">GET</button></a>
+        <a href="produtoPost.html"><button class="post">POST</button></a>
+        <a href="produtoPut.html"><button class="put">PUT</button></a>
+        <a href="produtoPatch.html"><button class="patch">PATCH</button></a>
+        <a href="produtoDelete.html"><button class="delete">DELETE</button></a>
+    </div>
+</div>
+
+</body>
+</html>

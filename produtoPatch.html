@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Atualizar Produto</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #7E57C2;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 20px;
+        }
+
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 400px;
+        }
+
+        form, .message, #productDetails {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        input, button {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+
+        button {
+            background-color: #7E57C2;
+            color: white;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #673AB7;
+        }
+
+        @media (max-width: 600px) {
+            form, .message, #productDetails {
+                padding: 20px;
+            }
+
+            input, button {
+                padding: 10px;
+                font-size: 14px;
+            }
+        }
+
+        .message {
+            text-align: center;
+        }
+
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        #productDetails {
+            display: none;
+        }
+
+        .product-card {
+           
+            border-radius: 8px;
+            padding: 20px;
+            
+        }
+
+        .product-title {
+            font-size: 1.5rem;
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .product-card p {
+            font-size: 1rem;
+            line-height: 1.6;
+            margin: 8px 0;
+            color: #333;
+        }
+
+        .product-card strong {
+            color: lightskyblue;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container" style="margin-top: 100px;">
+        <form id="patchProdutoForm">
+            <h1>Atualizar Parcialmente Produto</h1>
+            <input type="number" id="id" placeholder="ID do Produto" required>
+            <input type="text" id="nome" placeholder="Nome do Produto (opcional)">
+            <input type="text" id="descricao" placeholder="Descrição (opcional)">
+            <input type="number" id="quantidade" placeholder="Quantidade (opcional)">
+            <input type="text" id="marca" placeholder="Marca (opcional)">
+            <input type="number" id="preco" placeholder="Preço (opcional)">
+            <input type="date" id="validade" placeholder="Validade">
+            <button type="submit">Atualizar Produto</button>
+        </form>
+
+        <div id="message" class="message" style="display:none;"></div>
+        <div id="productDetails" style="display:none;"></div>
+    </div>
+
+    <script>
+        document.getElementById('patchProdutoForm').addEventListener('submit', function(event) {  // Adiciona um evento de 'submit' ao formulário com id 'patchProdutoForm'
+            event.preventDefault(); //  Evita o comportamento padrão do formulário
+
+            const id = document.getElementById('id').value;
+            const nome = document.getElementById('nome').value;
+            const descricao = document.getElementById('descricao').value;
+            const quantidade = document.getElementById('quantidade').value;
+            const marca = document.getElementById('marca').value;
+            const preco = document.getElementById('preco').value;
+            const validade = document.getElementById('validade').value;
+
+             // Cria um objeto com os dados do produto, incluindo apenas os campos que têm valor
+            const productData = {
+                tabela: 'Produtos',
+                id,
+                ...(nome && { nome }),
+                ...(descricao && { descricao }),
+                ...(quantidade && { quantidade }),
+                ...(marca && { marca }),
+                ...(preco && { preco }),
+                ...(validade && { validade })
+            };
+
+               // Envia uma requisição PATCH para o servidor com os dados do produto
+            fetch('http://localhost/Loja-produtos/controller/produto.php', {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json' // Define o tipo de conteúdo como JSON
+                },
+                body: JSON.stringify(productData)
+            })
+            .then(response => response.text()) // Converte a resposta para texto
+            .then(data => {
+                try {
+                    const jsonData = JSON.parse(data);  // Tenta analisar a resposta como JSON
+                    if (jsonData.message) {
+                        showMessage('Produto atualizado com sucesso!', 'success'); // Exibe mensagem de sucesso
+                        showUpdatedProduct(jsonData.produto || productData); // Mostra detalhes do produto atualizado
+                    } else {
+                        showMessage('Erro: ' + jsonData.error, 'error'); 
+                    }
+                } catch (e) {
+                    showMessage('Resposta do servidor: ' + data, 'success');
+                    showUpdatedProduct(productData);
+                }
+            })
+            .catch(error => {
+                showMessage('Erro na requisição: ' + error.message, 'error');
+            });
+        });
+
+        //função para aparecer a mensagem 
+        function showMessage(message, type) {
+            const messageDiv = document.getElementById('message');
+            messageDiv.innerText = message;
+            messageDiv.className = 'message ' + type;
+            messageDiv.style.display = 'block';
+
+            setTimeout(() => {
+                messageDiv.style.display = 'none'; 
+            }, 5000);
+        }
+
+        function showUpdatedProduct(product) {
+            const productDetails = document.getElementById('productDetails');
+
+            productDetails.innerHTML = `
+                <div class="product-card">
+                    <h3 class="product-title">Detalhes do Produto Atualizado</h3>
+                    <p><strong>ID:</strong> ${product.id}</p>
+                    ${product.nome ? `<p><strong>Nome:</strong> ${product.nome}</p>` : ''}
+                    ${product.descricao ? `<p><strong>Descrição:</strong> ${product.descricao}</p>` : ''}
+                    ${product.quantidade ? `<p><strong>Quantidade:</strong> ${product.quantidade}</p>` : ''}
+                    ${product.marca ? `<p><strong>Marca:</strong> ${product.marca}</p>` : ''}
+                    ${product.preco ? `<p><strong>Preço:</strong> R$ ${parseFloat(product.preco).toFixed(2)}</p>` : ''}
+                    ${product.validade ? `<p><strong>Validade:</strong> ${new Date(product.validade).toLocaleDateString('pt-BR')}</p>` : ''}
+                </div>
+            `;
+
+            productDetails.style.display = 'block';
+        }
+    </script>
+
+</body>
+</html>

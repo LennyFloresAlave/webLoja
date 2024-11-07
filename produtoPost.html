@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Criar Produto</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #7E57C2;
+            margin: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        form {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            width: 280px;
+        }
+        input{
+            width: 258px;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #7E57C2;
+            color: white;
+            border: none;
+            cursor: pointer;
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button:hover {
+            background-color: #673AB7;
+        }
+        .message {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 5px;
+            width: 300px;
+            text-align: center;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .product-list {
+            margin-top: 20px;
+            background: white;
+            padding: 10px;
+            border-radius: 8px;
+            width: 300px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .product-item {
+            margin-bottom: 15px;
+            padding: 10px;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        .product-item h3 {
+            margin: 0;
+            font-size: 16px;
+            color: #007BFF;
+        }
+        .product-item p {
+            margin: 5px 0;
+            font-size: 14px;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+
+    <form id="productForm" style="margin-top: 150px;">
+    <h1 style="text-align: center;">Criar Produto</h1>
+
+    <input type="text" id="nome" placeholder="Nome do Produto" required>
+    <input type="text" id="descricao" placeholder="Descrição" required>
+    <input type="number" id="quantidade" placeholder="Quantidade" required>
+    <input type="text" id="marca" placeholder="Marca" required>
+    <input type="number" id="preco" placeholder="Preço" required>
+    <input type="date" id="validade" placeholder="Validade" required>
+    <button type="submit">Criar Produto</button>
+</form>
+
+<!-- Mensagem de resultado (sucesso ou erro) -->
+<div class="message" id="message" style="display: none;"></div>
+
+<!-- Lista de produtos adicionados -->
+<div class="product-list" id="productList" style="display: none;">
+    <h2>Produtos Adicionados:</h2>
+    <div id="productItems"></div>
+</div>
+
+
+<script>
+    document.getElementById('productForm').addEventListener('submit', function(event) {
+        event.preventDefault(); // Evita o comportamento padrão do formulário
+
+        const nome = document.getElementById('nome').value;
+        const descricao = document.getElementById('descricao').value;
+        const quantidade = document.getElementById('quantidade').value;
+        const marca = document.getElementById('marca').value;
+        const preco = document.getElementById('preco').value;
+        const validade = document.getElementById('validade').value;
+
+        const productData = {
+            nome: nome,
+            descricao: descricao,
+            quantidade: quantidade,
+            marca: marca,
+            preco: preco,
+            validade: validade
+        };
+
+        // Requisição POST para a API
+        fetch('http://localhost/Loja-produtos/controller/produto.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(productData)
+        })
+        .then(response => {
+            if (response.ok) {
+                return response.json();
+            } else {
+                throw new Error('Erro na criação do produto.');
+            }
+        })
+        .then(data => {
+            // Mostra a mensagem de sucesso
+            showMessage('Produto criado com sucesso!', 'success');
+            addProductToList(productData); // Adiciona o produto à lista
+        })
+        .catch(error => {
+            // Mostra a mensagem de erro
+            showMessage('Erro ao criar o produto: ' + error.message, 'error');
+        });
+    });
+
+    // Função para exibir mensagem de sucesso ou erro
+    function showMessage(message, type) {
+        const messageDiv = document.getElementById('message');
+        messageDiv.innerText = message;
+        messageDiv.className = 'message ' + type;
+        messageDiv.style.display = 'block';
+
+        // Oculta a mensagem após 5 segundos
+        setTimeout(() => {
+            messageDiv.style.display = 'none';
+        }, 5000);
+    }
+
+    // Função para adicionar o produto à lista
+    function addProductToList(product) {
+        const productList = document.getElementById('productList');
+        const productItems = document.getElementById('productItems');
+        
+        // Exibe a lista de produtos
+        productList.style.display = 'block';
+
+        // Cria um novo item de produto estilizado
+        const listItem = document.createElement('div');
+        listItem.className = 'product-item';
+        listItem.innerHTML = `
+            <h3>${product.nome}</h3>
+            <p><strong>Descrição:</strong> ${product.descricao}</p>
+            <p><strong>Marca:</strong> ${product.marca}</p>
+            <p><strong>Preço:</strong> R$ ${product.preco}</p>
+            <p><strong>Quantidade:</strong> ${product.quantidade}</p>
+            <p><strong>Validade:</strong> ${product.validade}</p>
+        `;
+        
+        // Adiciona o item à lista de produtos
+        productItems.appendChild(listItem);
+    }
+</script>
+
+</body>
+</html>
